@@ -38,8 +38,10 @@
   <div class="container mt-4" id="resultContainer" style="display: none;">
     <h2>Прогноз инфляции:</h2>
     <img id="uploadedImage" src="" alt="Uploaded Image" class="img-fluid">
-<!--    <h2>Array of Numbers:</h2> -->
-<!--    <ul id="numberList"></ul> -->
+    <h2>Числовые значения:</h2>
+    <table id="data-table" class="table">
+      <tr><th>Дата</th><th>Реальное значение</th><th>Прогноз</th></tr>
+    </table>
   </div>
   
   <div class="container mt-4" id="errorContainer" style="display: none;">
@@ -109,7 +111,7 @@
       var formData = new FormData(this); // Create a new FormData object from the form
       
       // Make a POST request to the FastAPI app endpoint
-      fetch('http://158.160.52.247:8080/inf', {
+      fetch('http://localhost:8080/inf', {
         method: 'POST',
         body: formData
       })
@@ -118,15 +120,26 @@
           // Display the uploaded image
           var imageSource = 'data:image/png;base64,' + data.graph;          
           $('#uploadedImage').attr('src', imageSource);
-          
-          // Display the array of numbers
-          // var numberList = $('#numberList');
-          // numberList.empty(); // Clear any existing list items
-          // data.predictions.forEach(function(number) {
-          //  var listItem = $('<li>').text(number);
-          //  numberList.append(listItem);
-          // });
-          
+
+          const $table = $('#data-table');
+          const maxLength = Math.max( data.predictions.length, data.timestamps.length, data.real.length);
+          for (let i = maxLength-1; i >= 0; i--) {
+            const $row = $('<tr>');
+
+            const $cell1 = $('<th>').text(data.timestamps[i]);
+            $row.append($cell1);
+
+            const $cell2 = $('<td>');
+            $cell2.text(data.real[i]);
+            $row.append($cell2);
+
+            const $cell3 = $('<td>');
+            $cell3.text(data.predictions[i-(data.timestamps.length-data.predictions.length)]);
+            $row.append($cell3);
+
+            $table.append($row);
+          }
+
           // Show the result container
           $('#spinner').hide();
           $('#resultContainer').show();
